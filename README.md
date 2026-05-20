@@ -1,112 +1,134 @@
 # SGI CIRNSAS - MVP
 
-Repositorio base del MVP para CIRNSAS con arquitectura:
+Aplicativo interno para CIRNSAS que centraliza:
+
+- Inventario y estado comercial de apartamentos
+- Reservas y ventas con trazabilidad
+- Seguimiento de pagos por cliente
+- Control presupuestal de obra (presupuestado vs ejecutado)
+- Autenticación básica, auditoría y exportación de reportes
+
+## Arquitectura
 
 - `frontend`: React + Vite
 - `backend`: Node.js + Express
 - `database`: MySQL
+- `ci`: GitHub Actions
+- `quality`: tests backend/frontend + validación con Zod
 
-## Qué incluye este MVP
+## Estructura
 
-1. **Inventario de apartamentos**
-   - Registro de apartamentos por proyecto/torre.
-   - Cambio de estado (`Disponible`, `Reservado`, `En promesa de compra`, `Escriturado`).
+- `frontend/src/App.jsx`: interfaz principal del MVP
+- `backend/src/app.js`: rutas, validación, permisos y errores estandarizados
+- `backend/src/db.js`: conexión y esquema MySQL
+- `backend/sql/seed.sql`: datos de prueba
+- `.github/workflows/ci.yml`: pipeline CI
+- `docker-compose.yml`: stack local completo con Docker
 
-2. **Seguimiento de pagos**
-   - Registro de cuotas por cliente.
-   - Cambio de estado de pago (`Pendiente`, `Pagado`, `Vencido`).
+## Historias de usuario cubiertas
 
-3. **Control presupuestal**
-   - Registro de rubros presupuestados.
-   - Registro de gastos de obra.
-   - Resumen de ejecutado vs presupuestado con porcentaje y alertas.
-
-4. **Autenticación y reportes**
-   - Login con usuario/contraseña.
-   - Sesión activa y cierre de sesión.
-   - Exportación de reporte de pagos en CSV (compatible con Excel).
+- HU-01 a HU-03: inventario, reservas, ventas y cambios de estado
+- HU-04 y HU-05: registro de pagos, estados automáticos y vista por cliente
+- HU-06 a HU-08: presupuesto, gastos, comparativo y alertas
+- HU-09: login con sesión y control básico de permisos
+- HU-10: exportación CSV de estado de pagos
 
 ## Requisitos
 
-- Node.js 20+ ([https://nodejs.org](https://nodejs.org))
-- MySQL 8+ ([https://dev.mysql.com/downloads/mysql/](https://dev.mysql.com/downloads/mysql/))
+- Node.js 20+
+- MySQL 8+
 
-## Instalación
+## Variables de entorno
 
-### 1) Crear base de datos
+Copia `.env.example` en `.env`:
 
-En MySQL crea la base:
+```bash
+cp .env.example .env
+```
+
+Contenido esperado:
+
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=cirnsas_db
+AUTH_SALT=cirnsas_mvp_salt
+```
+
+## Ejecución local (sin Docker)
+
+1) Crear base de datos:
 
 ```sql
 CREATE DATABASE cirnsas_db;
 ```
 
-### 2) Configurar variables de entorno
-
-Usa el archivo `.env` en la raiz del proyecto con:
-
-```env
-PORT=4000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=
-DB_NAME=cirnsas_db
-```
-
-### 3) Instalar dependencias
-
-Desde la raíz del proyecto:
+2) Instalar dependencias:
 
 ```bash
 npm install
 npm run install:all
 ```
 
-## Ejecución en desarrollo
-
-Desde la raíz:
+3) Levantar app:
 
 ```bash
 npm run dev
 ```
 
-Esto levanta:
-
-- Backend: [http://localhost:4000](http://localhost:4000)
-- Frontend: [http://localhost:5173](http://localhost:5173)
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:4000`
 
 Credenciales demo:
 
 - `asesor@cirnsas.com` / `asesor123`
 - `admin@cirnsas.com` / `admin123`
 
-## Seed opcional de datos
-
-Para insertar datos iniciales de prueba (despues de iniciar la API una vez para que cree tablas):
+4) (Opcional) Cargar seed:
 
 ```bash
 mysql -u root -p cirnsas_db < backend/sql/seed.sql
 ```
 
-## Endpoints principales
+## Ejecución con Docker Compose
 
-- `GET /api/health`
+```bash
+docker compose up --build
+```
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:4000`
+- MySQL: `localhost:3306` (`root/root`)
+
+## Pruebas y calidad
+
+```bash
+npm test
+```
+
+Esto ejecuta:
+
+- tests de backend (`vitest` + `supertest`)
+- tests de frontend (`vitest` + `testing-library`)
+
+## Endpoints clave
+
 - `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `GET /api/auth/me`
-- `GET/POST /api/apartamentos`
-- `POST /api/ventas`
+- `GET /api/apartamentos`
 - `POST /api/reservas`
-- `POST /api/reservas/:id/cancelar`
-- `POST /api/reservas/:id/convertir-venta`
-- `GET /api/ventas`
-- `GET/POST /api/pagos`
-- `PATCH /api/pagos/:id`
+- `POST /api/ventas`
 - `GET /api/clientes/resumen-pagos`
-- `GET /api/clientes/:ventaId/pagos`
 - `GET /api/reportes/pagos.csv`
 - `GET /api/presupuesto/resumen`
-- `POST /api/presupuesto/items`
-- `PUT /api/presupuesto/items/:id`
-- `DELETE /api/presupuesto/items/:id`
-- `POST /api/presupuesto/gastos`
+- `GET /api/auditoria/estados-apartamento`
+
+## Checklist demo (video)
+
+1. Login con usuario asesor
+2. Crear apartamento y filtrarlo
+3. Crear reserva y convertirla a venta
+4. Registrar cuotas/pagos y ver estado global del cliente
+5. Exportar reporte CSV de pagos
+6. Registrar rubro + gasto y mostrar alerta de desviación
+7. Mostrar pestaña de auditoría y trazabilidad de cambios

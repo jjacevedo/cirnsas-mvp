@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-const API_URL = "http://localhost:4000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 const TOKEN_KEY = "cirnsas_token";
 
 const initialApto = {
@@ -61,6 +61,7 @@ function App() {
   const [resumenClientes, setResumenClientes] = useState([]);
   const [detalleCliente, setDetalleCliente] = useState([]);
   const [presupuesto, setPresupuesto] = useState([]);
+  const [auditoriaEstados, setAuditoriaEstados] = useState([]);
 
   const [filtrosInventario, setFiltrosInventario] = useState({
     proyecto: "",
@@ -128,7 +129,7 @@ function App() {
     const response = await fetch(`${API_URL}${path}`, { ...options, headers });
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || "Error al consultar la API");
+      throw new Error(error.message || error.error || "Error al consultar la API");
     }
     return parseJson ? response.json() : response;
   }
@@ -193,6 +194,10 @@ function App() {
     setPresupuesto(await api("/presupuesto/resumen"));
   }
 
+  async function loadAuditoria() {
+    setAuditoriaEstados(await api("/auditoria/estados-apartamento"));
+  }
+
   async function loadAll() {
     await Promise.all([
       loadApartamentos(),
@@ -200,6 +205,7 @@ function App() {
       loadPagos(),
       loadResumenClientes(),
       loadPresupuesto(),
+      loadAuditoria(),
     ]);
   }
 
@@ -236,6 +242,7 @@ function App() {
         loadPagos(),
         loadResumenClientes(),
         loadPresupuesto(),
+        loadAuditoria(),
       ]);
     } catch (error) {
       alert(error.message);
@@ -458,6 +465,12 @@ function App() {
           onClick={() => setTab("presupuesto")}
         >
           Presupuesto
+        </button>
+        <button
+          className={tab === "auditoria" ? "active" : ""}
+          onClick={() => setTab("auditoria")}
+        >
+          Auditoría
         </button>
       </nav>
 
@@ -1128,10 +1141,55 @@ function App() {
                       <button className="btn-muted" onClick={() => setEditingRubro(r)}>
                         Editar
                       </button>{" "}
-                      <button className="btn-danger" onClick={() => eliminarRubro(r.id)}>
+                      <button
+                        className="btn-danger"
+                        disabled={user.rol !== "Administrador"}
+                        title={
+                          user.rol !== "Administrador"
+                            ? "Solo administrador puede eliminar rubros"
+                            : ""
+                        }
+                        onClick={() => eliminarRubro(r.id)}
+                      >
                         Eliminar
                       </button>
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {tab === "auditoria" && (
+        <section className="module">
+          <h2>Auditoría de cambios de estado de apartamentos</h2>
+          <div className="card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Proyecto</th>
+                  <th>Apto</th>
+                  <th>Estado anterior</th>
+                  <th>Estado nuevo</th>
+                  <th>Motivo</th>
+                  <th>Usuario</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditoriaEstados.map((a) => (
+                  <tr key={a.id}>
+                    <td>{String(a.created_at).slice(0, 19).replace("T", " ")}</td>
+                    <td>{a.proyecto}</td>
+                    <td>
+                      {a.torre}-{a.numero}
+                    </td>
+                    <td>{a.estado_anterior}</td>
+                    <td>{a.estado_nuevo}</td>
+                    <td>{a.motivo}</td>
+                    <td>{a.usuario}</td>
                   </tr>
                 ))}
               </tbody>
