@@ -4,7 +4,7 @@ Repositorio base del MVP para CIRNSAS con arquitectura:
 
 - `frontend`: React + Vite
 - `backend`: Node.js + Express
-- `database`: PostgreSQL
+- `database`: MySQL
 
 ## Qué incluye este MVP
 
@@ -19,36 +19,38 @@ Repositorio base del MVP para CIRNSAS con arquitectura:
 3. **Control presupuestal**
    - Registro de rubros presupuestados.
    - Registro de gastos de obra.
-   - Resumen de ejecutado vs presupuestado.
+   - Resumen de ejecutado vs presupuestado con porcentaje y alertas.
+
+4. **Autenticación y reportes**
+   - Login con usuario/contraseña.
+   - Sesión activa y cierre de sesión.
+   - Exportación de reporte de pagos en CSV (compatible con Excel).
 
 ## Requisitos
 
 - Node.js 20+ ([https://nodejs.org](https://nodejs.org))
-- PostgreSQL 14+ ([https://www.postgresql.org/download/](https://www.postgresql.org/download/))
+- MySQL 8+ ([https://dev.mysql.com/downloads/mysql/](https://dev.mysql.com/downloads/mysql/))
 
 ## Instalación
 
 ### 1) Crear base de datos
 
-En PostgreSQL crea la base:
+En MySQL crea la base:
 
 ```sql
-CREATE DATABASE cirnsas_mvp;
+CREATE DATABASE cirnsas_db;
 ```
 
-### 2) Configurar variables de entorno del backend
+### 2) Configurar variables de entorno
 
-En la carpeta `backend`, crea un archivo `.env` basado en `.env.example`:
-
-```bash
-cp backend/.env.example backend/.env
-```
-
-Ejemplo de valor:
+Usa el archivo `.env` en la raiz del proyecto con:
 
 ```env
 PORT=4000
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cirnsas_mvp
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=cirnsas_db
 ```
 
 ### 3) Instalar dependencias
@@ -73,21 +75,38 @@ Esto levanta:
 - Backend: [http://localhost:4000](http://localhost:4000)
 - Frontend: [http://localhost:5173](http://localhost:5173)
 
+Credenciales demo:
+
+- `asesor@cirnsas.com` / `asesor123`
+- `admin@cirnsas.com` / `admin123`
+
 ## Seed opcional de datos
 
-Para insertar datos iniciales de prueba:
+Para insertar datos iniciales de prueba (despues de iniciar la API una vez para que cree tablas):
 
 ```bash
-psql "postgresql://postgres:postgres@localhost:5432/cirnsas_mvp" -f backend/sql/seed.sql
+mysql -u root -p cirnsas_db < backend/sql/seed.sql
 ```
 
 ## Endpoints principales
 
 - `GET /api/health`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
 - `GET/POST /api/apartamentos`
-- `PATCH /api/apartamentos/:id/estado`
+- `POST /api/ventas`
+- `POST /api/reservas`
+- `POST /api/reservas/:id/cancelar`
+- `POST /api/reservas/:id/convertir-venta`
+- `GET /api/ventas`
 - `GET/POST /api/pagos`
 - `PATCH /api/pagos/:id`
+- `GET /api/clientes/resumen-pagos`
+- `GET /api/clientes/:ventaId/pagos`
+- `GET /api/reportes/pagos.csv`
 - `GET /api/presupuesto/resumen`
 - `POST /api/presupuesto/items`
+- `PUT /api/presupuesto/items/:id`
+- `DELETE /api/presupuesto/items/:id`
 - `POST /api/presupuesto/gastos`
