@@ -1,0 +1,25 @@
+{
+  "name": "sgi-cirnsas-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MVP SGI CIRNSAS con frontend React y backend Node.js + PostgreSQL",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start": "npm run start --prefix backend"
+  },
+  "keywords": [
+    "cirnsas",
+    "mvp",
+    "react",
+    "node",
+    "postgresql"
+  ],
+  "author": "Equipo CIRNSAS",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
