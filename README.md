@@ -21,11 +21,15 @@ Aplicativo interno para CIRNSAS que centraliza:
 - `frontend/src/App.jsx`: interfaz principal del MVP
 - `backend/src/app.js`: rutas, validación, permisos y errores estandarizados
 - `backend/src/db.js`: conexión y esquema MySQL
-- `backend/sql/seed.sql`: datos de prueba
+- `backend/sql/seed.sql`: datos de prueba opcionales
 - `.github/workflows/ci.yml`: pipeline CI
 - `docker-compose.yml`: stack local completo con Docker
 
-## Historias de usuario cubiertas
+## Historias de usuario
+
+Backlog en GitHub: https://github.com/jjacevedo/cirnsas-mvp/issues (HU-01 … HU-10).
+
+Funcionalidad cubierta en el MVP:
 
 - HU-01 a HU-03: inventario, reservas, ventas y cambios de estado
 - HU-04 y HU-05: registro de pagos, estados automáticos y vista por cliente
@@ -99,7 +103,7 @@ docker compose up --build
 
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:4000`
-- MySQL: `localhost:3306` (`root/root`)
+- MySQL: `localhost:3307` (`root/root`)
 
 ## Pruebas y calidad
 
